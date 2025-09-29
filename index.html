@@ -5,9 +5,142 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPARROW AI HERO</title>
     <link rel="stylesheet" href="style.css">
+    <!-- External Libraries for Interactive Features -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <div id="app"></div>
+    <!-- Navigation -->
+    <nav id="main-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <img src="ai-hero.svg" alt="SPARROW AI HERO Logo" class="nav-logo">
+                <h1>SPARROW AI HERO</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#hero">Home</a></li>
+                <li><a href="#projects">Projects</a></li>
+                <li><a href="#expertise">Expertise</a></li>
+                <li><a href="#manifestos">Publications</a></li>
+                <li><a href="#tools">Tools</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+            <div class="nav-controls">
+                <button id="theme-toggle" class="nav-control-btn" aria-label="Switch theme">
+                    🎨
+                </button>
+                <button id="lang-toggle" class="nav-control-btn" aria-label="Switch language">
+                    🌍
+                </button>
+                <span id="current-theme-lang" class="theme-lang-indicator">CYBER/EN</span>
+            </div>
+            <button class="nav-toggle" aria-label="Toggle navigation">☰</button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="hero" class="hero-section">
+        <div class="hero-container">
+            <div class="hero-content">
+                <div class="hero-avatar-section">
+                    <div class="hero-avatar">
+                        <img src="avatar.png" alt="SPARROW AI HERO Avatar" class="avatar-image">
+                    </div>
+                </div>
+                <h1 id="hero-title" class="gonzo-title">SPARROW AI HERO</h1>
+                <h2 id="hero-subtitle" class="gonzo-subtitle">Tales from Cyberpunk Underground</h2>
+                <p id="hero-tagline" class="hero-tagline">AI Developer & MCP Protocol Specialist</p>
+                <div class="hero-ctas">
+                    <button id="start-journey-btn" class="cta-button primary">Explore My Work</button>
+                    <button id="weapons-btn" class="cta-button secondary">View Projects</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Project Portfolio -->
+    <section id="projects" class="projects-section">
+        <div class="container">
+            <h2 class="section-title">PROJECT PORTFOLIO</h2>
+            <div id="projects-content" class="projects-content"></div>
+        </div>
+    </section>
+
+    <!-- Expertise Section -->
+    <section id="expertise" class="expertise-section">
+        <div class="container">
+            <h2 class="section-title">EXPERTISE AREAS</h2>
+            <div id="expertise-grid" class="expertise-grid"></div>
+        </div>
+    </section>
+
+    <!-- Manifestos (Publications) -->
+    <section id="manifestos" class="manifestos-section">
+        <div class="container">
+            <h2 class="section-title">MANIFESTOS FROM THE DIGITAL UNDERGROUND</h2>
+            <div id="manifestos-content" class="manifestos-content"></div>
+        </div>
+    </section>
+
+    <!-- Interactive Tools -->
+    <section id="tools" class="tools-section">
+        <div class="container">
+            <h2 class="section-title">DIGITAL WEAPONS & TOOLS</h2>
+            <div class="tools-grid">
+                <div id="mermaid-tool" class="tool-card">
+                    <h3>Mermaid Diagram Editor</h3>
+                    <p>Create live flowcharts and diagrams</p>
+                    <button id="open-mermaid-btn" class="tool-button">Launch Editor</button>
+                </div>
+                <div id="voice-tool" class="tool-card">
+                    <h3>SPAREBOT Voice Assistant</h3>
+                    <p>Chat with the digital revolutionary</p>
+                    <button id="open-voice-btn" class="tool-button">Start Conversation</button>
+                </div>
+                <div id="chatbot-tool" class="tool-card">
+                    <h3>AI Chatbot Interface</h3>
+                    <p>Experience the future of conversation</p>
+                    <button id="open-chatbot-btn" class="tool-button">Open Chat</button>
+                </div>
+                <div id="infographics-tool" class="tool-card">
+                    <h3>MCP Infographics</h3>
+                    <p>Visualize the revolution ecosystem</p>
+                    <button id="open-infographics-btn" class="tool-button">View Graphics</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact-section">
+        <div class="container">
+            <h2 class="section-title">CONTACT THE DIGITAL WARRIOR</h2>
+            <div class="contact-content">
+                <p>Ready to join the revolution? Reach out through these channels:</p>
+                <div class="contact-links">
+                    <a href="https://github.com/sparesparrow" target="_blank" class="contact-link">
+                        <span class="contact-icon">🐙</span> GitHub
+                    </a>
+                    <a href="mailto:sparesparrow@protonmail.ch" class="contact-link">
+                        <span class="contact-icon">✉️</span> Email
+                    </a>
+                    <a href="https://www.linkedin.com/in/vojtech-spacek" target="_blank" class="contact-link">
+                        <span class="contact-icon">💼</span> LinkedIn
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal Container for Tools -->
+    <div id="modal-container" class="modal-container" style="display: none;">
+        <div class="modal-backdrop" id="modal-backdrop"></div>
+        <div class="modal-content" id="modal-content">
+            <button class="modal-close" id="modal-close">&times;</button>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
     <script src="app.js"></script>
 </body>
 </html>
