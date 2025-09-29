@@ -46,6 +46,13 @@ const translations = {
       cta1: 'Explore My Work',
       cta2: 'View Projects'
     },
+    stats: {
+      title: 'DIGITAL WARRIOR STATS',
+      projects: 'MCP Projects',
+      coverage: 'Test Coverage',
+      response: 'Faster Response',
+      bugs: 'Fewer Bugs'
+    },
     expertise: {
       title: 'EXPERTISE AREAS',
       mcp: {
@@ -360,49 +367,61 @@ function updateThemeIndicator() {
 function updateContent() {
   const t = translations[currentLanguage];
 
-  // Update navigation
-  document.querySelector('a[href="#hero"]').textContent = t.nav.home;
-  document.querySelector('a[href="#stats"]').textContent = t.nav.stats;
-  document.querySelector('a[href="#expertise"]').textContent = t.nav.expertise;
-  document.querySelector('a[href="#weapons"]').textContent = t.nav.weapons;
-  document.querySelector('a[href="#manifestos"]').textContent = t.nav.manifestos;
-  document.querySelector('a[href="#tools"]').textContent = t.nav.tools;
-  document.querySelector('a[href="#contact"]').textContent = t.nav.contact;
+  function setTextIfPresent(selector, text) {
+    const el = document.querySelector(selector);
+    if (el && typeof text === 'string') {
+      el.textContent = text;
+    }
+  }
+
+  // Update navigation (map "weapons" label to the actual #projects link)
+  setTextIfPresent('a[href="#hero"]', t.nav.home);
+  setTextIfPresent('a[href="#stats"]', t.nav.stats);
+  setTextIfPresent('a[href="#expertise"]', t.nav.expertise);
+  setTextIfPresent('a[href="#projects"]', t.nav.weapons);
+  setTextIfPresent('a[href="#manifestos"]', t.nav.manifestos);
+  setTextIfPresent('a[href="#tools"]', t.nav.tools);
+  setTextIfPresent('a[href="#contact"]', t.nav.contact);
 
   // Update hero
-  document.getElementById('hero-title').textContent = t.hero.title;
-  document.getElementById('hero-subtitle').textContent = t.hero.subtitle;
-  document.getElementById('hero-tagline').textContent = t.hero.tagline;
-  document.getElementById('start-journey-btn').textContent = t.hero.cta1;
-  document.getElementById('weapons-btn').textContent = t.hero.cta2;
+  setTextIfPresent('#hero-title', t.hero.title);
+  setTextIfPresent('#hero-subtitle', t.hero.subtitle);
+  setTextIfPresent('#hero-tagline', t.hero.tagline);
+  setTextIfPresent('#start-journey-btn', t.hero.cta1);
+  setTextIfPresent('#weapons-btn', t.hero.cta2);
 
-  // Update sections
-  document.querySelector('#stats .section-title').textContent = t.stats.title;
-  document.querySelector('#expertise .section-title').textContent = t.expertise.title;
-  document.querySelector('#weapons .section-title').textContent = t.weapons.title;
-  document.querySelector('#manifestos .section-title').textContent = t.manifestos.title;
-  document.querySelector('#tools .section-title').textContent = t.tools.title;
-  document.querySelector('#contact .section-title').textContent = t.contact.title;
-  document.querySelector('.contact-content p').textContent = t.contact.desc;
+  // Update section titles (map weapons -> projects)
+  setTextIfPresent('#stats .section-title', (t.stats && t.stats.title) || '');
+  setTextIfPresent('#expertise .section-title', t.expertise.title);
+  setTextIfPresent('#projects .section-title', (t.weapons && t.weapons.title) || 'PROJECTS');
+  setTextIfPresent('#manifestos .section-title', t.manifestos.title);
+  setTextIfPresent('#tools .section-title', t.tools.title);
+  setTextIfPresent('#contact .section-title', t.contact.title);
+  setTextIfPresent('.contact-content p', t.contact.desc);
 
-  // Update expertise cards
+  // Update expertise cards (skip the "title" key)
   const expertiseCards = document.querySelectorAll('.expertise-card');
   expertiseCards.forEach((card, index) => {
-    const exp = Object.values(t.expertise)[index + 1]; // Skip title
+    const exp = Object.values(t.expertise)[index + 1];
     if (exp) {
-      card.querySelector('h3').textContent = exp.title;
-      card.querySelector('p').textContent = exp.desc;
-      card.querySelector('.expertise-gonzo-name').textContent = exp.gonzoName;
+      const titleEl = card.querySelector('h3');
+      const descEl = card.querySelector('p');
+      const gonzoEl = card.querySelector('.expertise-gonzo-name');
+      if (titleEl) titleEl.textContent = exp.title;
+      if (descEl) descEl.textContent = exp.desc;
+      if (gonzoEl) gonzoEl.textContent = exp.gonzoName;
     }
   });
 
-  // Update tools
+  // Update tools (skip the "title" key)
   const toolCards = document.querySelectorAll('.tool-card');
   toolCards.forEach((card, index) => {
-    const tool = Object.values(t.tools)[index + 1]; // Skip title
+    const tool = Object.values(t.tools)[index + 1];
     if (tool) {
-      card.querySelector('h3').textContent = tool.title;
-      card.querySelector('p').textContent = tool.desc;
+      const titleEl = card.querySelector('h3');
+      const descEl = card.querySelector('p');
+      if (titleEl) titleEl.textContent = tool.title;
+      if (descEl) descEl.textContent = tool.desc;
     }
   });
 }
