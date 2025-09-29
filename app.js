@@ -5,13 +5,34 @@
 const GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY';
 let geminiModel = null;
 
+// Utility: dynamically load external scripts if missing
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) {
+      resolve();
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = src;
+    script.async = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error(`Failed to load script: ${src}`));
+    document.head.appendChild(script);
+  });
+}
+
 // Initialize Gemini AI
 function initGeminiAI() {
   if (GEMINI_API_KEY && GEMINI_API_KEY !== 'YOUR_GEMINI_API_KEY') {
     try {
-      const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-      geminiModel = genAI.getGenerativeModel({ model: "gemini-pro" });
-      console.log('Gemini AI initialized successfully');
+      if (typeof GoogleGenerativeAI === 'function') {
+        const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+        geminiModel = genAI.getGenerativeModel({ model: "gemini-pro" });
+        console.log('Gemini AI initialized successfully');
+      } else {
+        console.warn('Gemini SDK not loaded - using fallback responses');
+        geminiModel = null;
+      }
     } catch (error) {
       console.error('Failed to initialize Gemini AI:', error);
       geminiModel = null;
@@ -361,7 +382,9 @@ function updateThemeIndicator() {
                      currentTheme === 'professional' ? 'PROF' :
                      currentTheme === 'minimal' ? 'MIN' : 'MATRIX';
   const langShort = currentLanguage.toUpperCase();
-  indicator.textContent = `${themeShort}/${langShort}`;
+  if (indicator) {
+    indicator.textContent = `${themeShort}/${langShort}`;
+  }
 }
 
 function updateContent() {
@@ -552,17 +575,21 @@ function initThemeLanguageControls() {
   const themeBtn = document.getElementById('theme-toggle');
   const langBtn = document.getElementById('lang-toggle');
 
-  themeBtn.addEventListener('click', () => {
-    const currentIndex = themes.indexOf(currentTheme);
-    const nextIndex = (currentIndex + 1) % themes.length;
-    setTheme(themes[nextIndex]);
-  });
+  if (themeBtn) {
+    themeBtn.addEventListener('click', () => {
+      const currentIndex = themes.indexOf(currentTheme);
+      const nextIndex = (currentIndex + 1) % themes.length;
+      setTheme(themes[nextIndex]);
+    });
+  }
 
-  langBtn.addEventListener('click', () => {
-    const currentIndex = languages.indexOf(currentLanguage);
-    const nextIndex = (currentIndex + 1) % languages.length;
-    setLanguage(languages[nextIndex]);
-  });
+  if (langBtn) {
+    langBtn.addEventListener('click', () => {
+      const currentIndex = languages.indexOf(currentLanguage);
+      const nextIndex = (currentIndex + 1) % languages.length;
+      setLanguage(languages[nextIndex]);
+    });
+  }
 }
 
 // Stats Section
@@ -575,9 +602,9 @@ function initStats() {
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
-        animateCounter(document.getElementById('projects-count'), 15);
-        animateCounter(document.getElementById('coverage-count'), 98);
-        animateCounter(document.getElementById('response-count'), 3);
+        animateCounter(document.getElementById('projects-count'), 15, '+');
+        animateCounter(document.getElementById('coverage-count'), 98, '%');
+        animateCounter(document.getElementById('response-count'), 3, 'x');
         animateCounter(document.getElementById('bugs-count'), 85, '%', 2000, true);
         observer.unobserve(entry.target);
       }
@@ -731,20 +758,26 @@ function initTools() {
   });
 
   // Mermaid Editor
-  document.getElementById('open-mermaid-btn').addEventListener('click', openMermaidEditor);
+  const mermaidBtn = document.getElementById('open-mermaid-btn');
+  if (mermaidBtn) mermaidBtn.addEventListener('click', openMermaidEditor);
 
   // Voice Chat
-  document.getElementById('open-voice-btn').addEventListener('click', openVoiceChat);
+  const voiceBtn = document.getElementById('open-voice-btn');
+  if (voiceBtn) voiceBtn.addEventListener('click', openVoiceChat);
 
   // Chatbot
-  document.getElementById('open-chatbot-btn').addEventListener('click', openChatbot);
+  const chatbotBtn = document.getElementById('open-chatbot-btn');
+  if (chatbotBtn) chatbotBtn.addEventListener('click', openChatbot);
 
   // Infographics
-  document.getElementById('open-infographics-btn').addEventListener('click', openInfographics);
+  const infoBtn = document.getElementById('open-infographics-btn');
+  if (infoBtn) infoBtn.addEventListener('click', openInfographics);
 
   // Modal close
-  document.getElementById('modal-close').addEventListener('click', closeModal);
-  document.getElementById('modal-backdrop').addEventListener('click', closeModal);
+  const closeBtn = document.getElementById('modal-close');
+  const backdrop = document.getElementById('modal-backdrop');
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (backdrop) backdrop.addEventListener('click', closeModal);
 }
 
 // Modal functions
@@ -778,18 +811,34 @@ function openMermaidEditor() {
 
   openModal(content);
 
-  // Initialize Mermaid
-  mermaid.initialize({
-    startOnLoad: false,
-    theme: 'dark',
-    themeVariables: {
-      primaryColor: '#ff6b35',
-      primaryTextColor: '#fff',
-      primaryBorderColor: '#004d40',
-      lineColor: '#ffc107',
-      background: '#0f0f0f'
+  // Initialize Mermaid (load dynamically if missing)
+  const ensureMermaid = async () => {
+    try {
+      if (typeof mermaid === 'undefined') {
+        await loadScript('https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js');
+      }
+      if (typeof mermaid === 'undefined') {
+        throw new Error('Mermaid not available');
+      }
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: 'dark',
+        themeVariables: {
+          primaryColor: '#ff6b35',
+          primaryTextColor: '#fff',
+          primaryBorderColor: '#004d40',
+          lineColor: '#ffc107',
+          background: '#0f0f0f'
+        }
+      });
+    } catch (e) {
+      const out = document.getElementById('mermaid-output');
+      if (out) {
+        out.innerHTML = '<div style="color: var(--text-secondary);">Mermaid failed to load. Please check your network and try again.</div>';
+      }
     }
-  });
+  };
+  ensureMermaid();
 
   // Event listeners
   document.getElementById('diagram-examples').addEventListener('change', (e) => {
@@ -817,12 +866,18 @@ function openMermaidEditor() {
     document.getElementById('mermaid-code').value = examples[e.target.value] || '';
   });
 
-  document.getElementById('render-diagram').addEventListener('click', () => {
-    const code = document.getElementById('mermaid-code').value;
-    const output = document.getElementById('mermaid-output');
-    output.innerHTML = `<div class="mermaid">${code}</div>`;
-    mermaid.init(undefined, output.querySelector('.mermaid'));
-  });
+  const renderBtn = document.getElementById('render-diagram');
+  if (renderBtn) {
+    renderBtn.addEventListener('click', () => {
+      const code = document.getElementById('mermaid-code').value;
+      const output = document.getElementById('mermaid-output');
+      if (!output) return;
+      output.innerHTML = `<div class="mermaid">${code}</div>`;
+      if (typeof mermaid !== 'undefined') {
+        mermaid.init(undefined, output.querySelector('.mermaid'));
+      }
+    });
+  }
 }
 
 function openVoiceChat() {
@@ -839,9 +894,10 @@ function openVoiceChat() {
 
   openModal(content);
 
-  // Browser Speech API
-  if ('webkitSpeechRecognition' in window) {
-    const recognition = new webkitSpeechRecognition();
+  // Browser Speech API (standard or webkit)
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (SpeechRecognition) {
+    const recognition = new SpeechRecognition();
     recognition.lang = 'cs-CZ';
     recognition.continuous = false;
     recognition.interimResults = false;
@@ -872,7 +928,8 @@ function openVoiceChat() {
       startBtn.disabled = false;
     };
   } else {
-    document.getElementById('voice-status').textContent = 'Voice recognition not supported in this browser';
+    const statusEl = document.getElementById('voice-status');
+    if (statusEl) statusEl.textContent = 'Voice recognition not supported in this browser';
   }
 }
 
@@ -1008,8 +1065,18 @@ function openInfographics() {
 
   openModal(content);
 
-  // Create charts using Chart.js
-  const ctx1 = document.getElementById('mcp-chart').getContext('2d');
+  // Create charts using Chart.js (guard if missing)
+  const canvas1 = document.getElementById('mcp-chart');
+  const canvas2 = document.getElementById('projects-chart');
+  if (typeof Chart === 'undefined') {
+    const container = document.querySelector('.infographics-container');
+    if (container) {
+      container.innerHTML = '<div style="color: var(--text-secondary); text-align:center;">Charts unavailable (Chart.js failed to load).</div>';
+    }
+    return;
+  }
+
+  const ctx1 = canvas1.getContext('2d');
   new Chart(ctx1, {
     type: 'doughnut',
     data: {
@@ -1031,7 +1098,7 @@ function openInfographics() {
     }
   });
 
-  const ctx2 = document.getElementById('projects-chart').getContext('2d');
+  const ctx2 = canvas2.getContext('2d');
   new Chart(ctx2, {
     type: 'bar',
     data: {
@@ -1072,9 +1139,11 @@ function initNavigation() {
   const navToggle = document.querySelector('.nav-toggle');
   const navLinks = document.querySelector('.nav-links');
 
-  navToggle.addEventListener('click', () => {
-    navLinks.classList.toggle('active');
-  });
+  if (navToggle && navLinks) {
+    navToggle.addEventListener('click', () => {
+      navLinks.classList.toggle('active');
+    });
+  }
 
   // Smooth scrolling for nav links
   document.querySelectorAll('.nav-links a').forEach(link => {
