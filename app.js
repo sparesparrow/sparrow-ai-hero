@@ -372,6 +372,9 @@ function setTheme(theme) {
 function setLanguage(lang) {
   currentLanguage = lang;
   localStorage.setItem('language', lang);
+  if (document && document.documentElement) {
+    document.documentElement.setAttribute('lang', lang);
+  }
   updateThemeIndicator();
   updateContent();
 }
@@ -421,6 +424,16 @@ function updateContent() {
   setTextIfPresent('#tools .section-title', t.tools.title);
   setTextIfPresent('#contact .section-title', t.contact.title);
   setTextIfPresent('.contact-content p', t.contact.desc);
+
+  // Update stats labels
+  const statLabelKeys = ['projects', 'coverage', 'response', 'bugs'];
+  const statLabels = document.querySelectorAll('#stats .stat-label');
+  statLabels.forEach((labelEl, idx) => {
+    const key = statLabelKeys[idx];
+    if (t.stats && t.stats[key] && labelEl) {
+      labelEl.textContent = t.stats[key];
+    }
+  });
 
   // Update expertise cards (skip the "title" key)
   const expertiseCards = document.querySelectorAll('.expertise-card');
@@ -484,7 +497,7 @@ function initMatrixRain() {
   const matrixArray = matrix.split('');
 
   const fontSize = 14;
-  const columns = canvas.width / fontSize;
+  let columns = Math.floor(canvas.width / fontSize);
   const drops = [];
 
   for (let x = 0; x < columns; x++) {
@@ -514,6 +527,11 @@ function initMatrixRain() {
   window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    columns = Math.floor(canvas.width / fontSize);
+    drops.length = 0;
+    for (let x = 0; x < columns; x++) {
+      drops[x] = 1;
+    }
   });
 }
 
@@ -628,21 +646,28 @@ function initHero() {
   const t = translations[currentLanguage];
 
   // Typewriter effects with current language
-  setTimeout(() => typewriterEffect(subtitle, t.hero.subtitle), 500);
-  setTimeout(() => typewriterEffect(tagline, t.hero.tagline), 2000);
+  if (subtitle) setTimeout(() => typewriterEffect(subtitle, t.hero.subtitle), 500);
+  if (tagline) setTimeout(() => typewriterEffect(tagline, t.hero.tagline), 2000);
 
-  startBtn.addEventListener('click', () => {
-    document.getElementById('projects').scrollIntoView({ behavior: 'smooth' });
-  });
+  if (startBtn) {
+    startBtn.addEventListener('click', () => {
+      const section = document.getElementById('projects');
+      if (section) section.scrollIntoView({ behavior: 'smooth' });
+    });
+  }
 
-  weaponsBtn.addEventListener('click', () => {
-    document.getElementById('projects').scrollIntoView({ behavior: 'smooth' });
-  });
+  if (weaponsBtn) {
+    weaponsBtn.addEventListener('click', () => {
+      const section = document.getElementById('projects');
+      if (section) section.scrollIntoView({ behavior: 'smooth' });
+    });
+  }
 }
 
 // Projects Section - Categorized by Programming Language
 function initProjects() {
   const projectsContent = document.getElementById('projects-content');
+  if (!projectsContent) return;
 
   Object.entries(portfolioData.projects).forEach(([language, projects], categoryIndex) => {
     const categoryDiv = document.createElement('div');
@@ -670,7 +695,7 @@ function initProjects() {
         <div class="project-tags">
           ${project.tags.map(tag => `<span class="project-tag">${tag}</span>`).join('')}
         </div>
-        <a href="${project.url}" target="_blank" class="project-link">View Code →</a>
+        <a href="${project.url}" target="_blank" rel="noopener noreferrer" class="project-link">View Code →</a>
       `;
       projectGrid.appendChild(projectCard);
     });
@@ -738,7 +763,7 @@ function initManifestos() {
       <h3 class="manifesto-title">${manifesto.title}</h3>
       <p class="manifesto-description">${manifesto.description}</p>
       <div class="manifesto-date">${manifesto.date}</div>
-      <a href="${manifesto.url}" target="_blank" class="manifesto-link">Read Manifesto →</a>
+      <a href="${manifesto.url}" target="_blank" rel="noopener noreferrer" class="manifesto-link">Read Manifesto →</a>
     `;
     manifestosContent.appendChild(manifestoCard);
   });
@@ -784,6 +809,10 @@ function initTools() {
 function openModal(content) {
   const modalContainer = document.getElementById('modal-container');
   const modalBody = document.getElementById('modal-body');
+  if (!modalContainer || !modalBody) {
+    console.warn('Modal container not found.');
+    return;
+  }
   modalBody.innerHTML = content;
   modalContainer.style.display = 'flex';
 }
