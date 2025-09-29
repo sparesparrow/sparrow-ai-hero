@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="manifestoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f0f0f;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#1a0a0a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#000000;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="400" height="300" rx="15" fill="url(#manifestoGradient)"/>
+  <rect width="400" height="300" rx="15" fill="none" stroke="#ff6b35" stroke-width="2" opacity="0.3" filter="url(#glow)"/>
+
+  <!-- Manifesto text -->
+  <text x="200" y="40" text-anchor="middle" font-family="serif" font-size="24" fill="#ff6b35" font-weight="bold">MANIFESTO</text>
+  <text x="200" y="70" text-anchor="middle" font-family="serif" font-size="16" fill="#ffc107">FROM THE DIGITAL UNDERGROUND</text>
+
+  <!-- Content -->
+  <text x="30" y="110" font-family="serif" font-size="14" fill="#ffffff">The State Education Scam</text>
+  <text x="30" y="130" font-family="monospace" font-size="11" fill="#cccccc">Exposing the systematic failure of</text>
+  <text x="30" y="145" font-family="monospace" font-size="11" fill="#cccccc">government-controlled learning</text>
+
+  <text x="30" y="175" font-family="serif" font-size="14" fill="#ffffff">The State's War on Entrepreneurs</text>
+  <text x="30" y="195" font-family="monospace" font-size="11" fill="#cccccc">Breaking free from regulatory</text>
+  <text x="30" y="210" font-family="monospace" font-size="11" fill="#cccccc">chains and bureaucratic oppression</text>
+
+  <text x="30" y="240" font-family="serif" font-size="14" fill="#ffffff">Cybercrime as Surveillance Key</text>
+  <text x="30" y="260" font-family="monospace" font-size="11" fill="#cccccc">The dark alliance between crime</text>
+  <text x="30" y="275" font-family="monospace" font-size="11" fill="#cccccc">and the surveillance state</text>
+
+  <!-- Decorative elements -->
+  <circle cx="350" cy="50" r="20" fill="none" stroke="#00aa44" stroke-width="2" opacity="0.5"/>
+  <circle cx="350" cy="50" r="10" fill="#00aa44" opacity="0.3"/>
+  <circle cx="350" cy="250" r="15" fill="none" stroke="#ff6b35" stroke-width="1" opacity="0.4"/>
+  <path d="M320,150 Q350,130 380,150 Q350,170 320,150" fill="none" stroke="#ffc107" stroke-width="1" opacity="0.3"/>
+</svg>

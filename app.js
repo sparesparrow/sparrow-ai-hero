@@ -298,7 +298,7 @@ function typewriterEffect(element, text, speed = 50) {
 }
 
 // Animate counters
-function animateCounter(element, target, suffix = '', duration = 2000) {
+function animateCounter(element, target, suffix = '', duration = 2000, isNegative = false) {
   let start = 0;
   const increment = target / (duration / 16);
   const timer = setInterval(() => {
@@ -307,7 +307,8 @@ function animateCounter(element, target, suffix = '', duration = 2000) {
       start = target;
       clearInterval(timer);
     }
-    element.textContent = Math.floor(start) + suffix;
+    const displayValue = isNegative ? -Math.floor(start) : Math.floor(start);
+    element.textContent = displayValue + suffix;
   }, 16);
 }
 
@@ -486,6 +487,7 @@ function initPortfolio() {
   setLanguage(currentLanguage);
 
   initHero();
+  initStats();
   initProjects();
   initExpertise();
   initManifestos();
@@ -518,6 +520,31 @@ function initThemeLanguageControls() {
     const nextIndex = (currentIndex + 1) % languages.length;
     setLanguage(languages[nextIndex]);
   });
+}
+
+// Stats Section
+function initStats() {
+  const observerOptions = {
+    threshold: 0.5,
+    rootMargin: '0px 0px -100px 0px'
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        animateCounter(document.getElementById('projects-count'), 15);
+        animateCounter(document.getElementById('coverage-count'), 98);
+        animateCounter(document.getElementById('response-count'), 3);
+        animateCounter(document.getElementById('bugs-count'), 85, '%', 2000, true);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, observerOptions);
+
+  const statsSection = document.getElementById('stats');
+  if (statsSection) {
+    observer.observe(statsSection);
+  }
 }
 
 // Hero Section

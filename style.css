@@ -443,6 +443,49 @@ nav {
   flex-wrap: wrap;
 }
 
+/* Stats Section */
+.stats-section {
+  padding: 5rem 0;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+  margin-top: 3rem;
+}
+
+.stat-card {
+  background: var(--card-bg);
+  border: 2px solid var(--border-color);
+  border-radius: 10px;
+  padding: 2rem;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.stat-card:hover {
+  transform: translateY(-10px);
+  box-shadow: var(--shadow);
+}
+
+.stat-number {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: bold;
+  color: var(--sparrow-orange);
+  margin-bottom: 0.5rem;
+  text-shadow: 2px 2px 0px var(--anarchy-yellow);
+}
+
+.stat-label {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
 .cta-button {
   padding: 1rem 2rem;
   border: 2px solid var(--border-color);

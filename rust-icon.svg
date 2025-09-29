@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="150" viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="rustGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#000000;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ff6b35;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="200" height="150" rx="10" fill="url(#rustGradient)"/>
+
+  <!-- Rust code -->
+  <text x="15" y="35" font-family="monospace" font-size="12" fill="#ffffff">fn</text>
+  <text x="30" y="35" font-family="monospace" font-size="12" fill="#00aa44">main</text>
+  <text x="55" y="35" font-family="monospace" font-size="12" fill="#ffffff">() {</text>
+  <text x="25" y="55" font-family="monospace" font-size="12" fill="#ffc107">let</text>
+  <text x="45" y="55" font-family="monospace" font-size="12" fill="#ffffff">hero =</text>
+  <text x="75" y="55" font-family="monospace" font-size="12" fill="#004d40">Sparrow::new</text>
+  <text x="135" y="55" font-family="monospace" font-size="12" fill="#ffffff">();</text>
+  <text x="25" y="75" font-family="monospace" font-size="12" fill="#ffc107">println!</text>
+  <text x="75" y="75" font-family="monospace" font-size="12" fill="#ffffff">("⚡ High Performance ⚡");</text>
+  <text x="25" y="95" font-family="monospace" font-size="12" fill="#ffc107">let</text>
+  <text x="45" y="95" font-family="monospace" font-size="12" fill="#ffffff">weapons =</text>
+  <text x="95" y="95" font-family="monospace" font-size="12" fill="#004d40">vec!</text>
+  <text x="120" y="95" font-family="monospace" font-size="12" fill="#ffffff">["MCP", "Rust"];</text>
+  <text x="15" y="115" font-family="monospace" font-size="12" fill="#ffffff">}</text>
+
+  <!-- Rust logo elements -->
+  <path d="M155,100 L175,100 L175,115 L165,125 L155,115 Z" fill="#ff6b35"/>
+  <circle cx="165" cy="107" r="3" fill="#ffffff"/>
+  <text x="155" y="140" font-family="monospace" font-size="10" fill="#ffffff">SAFE</text>
+
+  <!-- Glow effect -->
+  <rect width="200" height="150" rx="10" fill="none" stroke="#ff6b35" stroke-width="1" opacity="0.3" filter="url(#glow)"/>
+</svg>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="150" viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="cppGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#004d40;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00695c;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="200" height="150" rx="10" fill="url(#cppGradient)"/>
+
+  <!-- Code brackets -->
+  <text x="20" y="40" font-family="monospace" font-size="24" fill="#ffffff" font-weight="bold">{</text>
+  <text x="160" y="40" font-family="monospace" font-size="24" fill="#ffffff" font-weight="bold">}</text>
+
+  <!-- C/C++ code -->
+  <text x="35" y="65" font-family="monospace" font-size="12" fill="#ffc107">#include</text>
+  <text x="35" y="80" font-family="monospace" font-size="12" fill="#ffffff">&lt;iostream&gt;</text>
+  <text x="35" y="100" font-family="monospace" font-size="12" fill="#ff6b35">int</text>
+  <text x="55" y="100" font-family="monospace" font-size="12" fill="#ffffff">main() {</text>
+  <text x="50" y="115" font-family="monospace" font-size="12" fill="#00aa44">printf</text>
+  <text x="80" y="115" font-family="monospace" font-size="12" fill="#ffffff">("Hello C/C++");</text>
+  <text x="35" y="130" font-family="monospace" font-size="12" fill="#ffffff">}</text>
+
+  <!-- Glow effect -->
+  <rect width="200" height="150" rx="10" fill="none" stroke="#ff6b35" stroke-width="1" opacity="0.3" filter="url(#glow)"/>
+</svg>
