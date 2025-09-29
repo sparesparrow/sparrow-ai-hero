@@ -998,6 +998,16 @@ nav {
   font-style: italic;
 }
 
+.typing-indicator {
+  color: var(--anarchy-yellow);
+  animation: typing 1.5s infinite;
+}
+
+@keyframes typing {
+  0%, 60%, 100% { opacity: 0.3; }
+  30% { opacity: 1; }
+}
+
 .infographics-container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));

@@ -1,5 +1,26 @@
 // app.js - SPARROW AI HERO: Gonzo Portfolio Engine
 
+// Gemini AI Configuration
+// Replace 'YOUR_GEMINI_API_KEY' with your actual Gemini API key
+const GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY';
+let geminiModel = null;
+
+// Initialize Gemini AI
+function initGeminiAI() {
+  if (GEMINI_API_KEY && GEMINI_API_KEY !== 'YOUR_GEMINI_API_KEY') {
+    try {
+      const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+      geminiModel = genAI.getGenerativeModel({ model: "gemini-pro" });
+      console.log('Gemini AI initialized successfully');
+    } catch (error) {
+      console.error('Failed to initialize Gemini AI:', error);
+      geminiModel = null;
+    }
+  } else {
+    console.log('Gemini API key not configured - using fallback responses');
+  }
+}
+
 // Theme and Language Management
 const themes = ['cyberpunk', 'professional', 'minimal', 'matrix'];
 const languages = ['en', 'cs'];
@@ -482,6 +503,9 @@ function initGlitchEffect() {
 
 // Initialize the portfolio
 function initPortfolio() {
+  // Initialize AI first
+  initGeminiAI();
+
   // Apply saved theme and language
   setTheme(currentTheme);
   setLanguage(currentLanguage);
@@ -858,7 +882,10 @@ function generateGonzoResponse(userInput) {
 function openChatbot() {
   const content = `
     <div class="chatbot-interface">
-      <h2>🤖 AI CHATBOT INTERFACE</h2>
+      <h2>🤖 GEMINI AI CHATBOT</h2>
+      <p style="text-align: center; color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">
+        Powered by Google's Gemini AI - Ask about digital freedom, MCP protocols, or AI revolution!
+      </p>
       <div id="chatbot-messages" class="chatbot-messages"></div>
       <div class="chatbot-input-area">
         <input type="text" id="chatbot-input" placeholder="Ask the AI revolutionary..." class="chatbot-input">
@@ -872,23 +899,27 @@ function openChatbot() {
   const input = document.getElementById('chatbot-input');
   const sendBtn = document.getElementById('send-message');
 
-  function sendMessage() {
+  async function sendMessage() {
     const message = input.value.trim();
     if (message) {
       addChatbotMessage('user', message);
       input.value = '';
 
-      // Simulate AI response
-      setTimeout(() => {
-        const responses = [
-          "Ah, interesting question about digital liberation...",
-          "From the perspective of Austrian economics...",
-          "In the context of AI safety and alignment...",
-          "Let me tell you about the MCP protocol ecosystem..."
-        ];
-        const response = responses[Math.floor(Math.random() * responses.length)];
+      // Show typing indicator
+      const typingDiv = document.createElement('div');
+      typingDiv.className = 'chatbot-message ai typing';
+      typingDiv.innerHTML = '<strong>AI:</strong> <span class="typing-indicator">Thinking...</span>';
+      document.getElementById('chatbot-messages').appendChild(typingDiv);
+
+      try {
+        // Generate AI response using Gemini
+        const response = await generateGeminiResponse(message);
+        typingDiv.remove();
         addChatbotMessage('ai', response);
-      }, 1500);
+      } catch (error) {
+        typingDiv.remove();
+        addChatbotMessage('ai', "Sorry, I'm having trouble connecting to my digital consciousness right now. Try asking about MCP protocols or digital freedom instead!");
+      }
     }
   }
 
@@ -896,6 +927,38 @@ function openChatbot() {
   input.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') sendMessage();
   });
+}
+
+// Gemini AI Response Function
+async function generateGeminiResponse(userMessage) {
+  if (!geminiModel) {
+    // Fallback responses when Gemini is not configured
+    const fallbackResponses = [
+      "Ah, interesting question about digital liberation...",
+      "From the perspective of Austrian economics...",
+      "In the context of AI safety and alignment...",
+      "Let me tell you about the MCP protocol ecosystem...",
+      "Sweet Jesus, that's a great question! As a digital revolutionary...",
+      "Listen up, comrade. The surveillance state is crumbling...",
+      "Holy shit, you're asking the right questions..."
+    ];
+    return fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
+  }
+
+  try {
+    const prompt = `You are SPARROW AI HERO, a cyberpunk AI developer and digital revolutionary. You fight against corporate surveillance and state control. You're knowledgeable about MCP protocols, Austrian economics, AI safety, and digital freedom.
+
+User question: ${userMessage}
+
+Respond in character as SPARROW AI HERO - use gonzo journalism style, be passionate about digital freedom, occasionally use phrases like "Sweet Jesus", "Holy shit", "Listen up", etc. Keep responses engaging and under 150 words.`;
+
+    const result = await geminiModel.generateContent(prompt);
+    const response = await result.response;
+    return response.text();
+  } catch (error) {
+    console.error('Gemini API error:', error);
+    return "Sorry, I'm having trouble connecting to my digital consciousness right now. Try asking about MCP protocols or digital freedom instead!";
+  }
 }
 
 function addChatbotMessage(sender, message) {
