@@ -1036,34 +1036,50 @@ function openChatbot() {
 
 // Gemini AI Response Function
 async function generateGeminiResponse(userMessage) {
-  if (!geminiModel) {
-    // Fallback responses when Gemini is not configured
-    const fallbackResponses = [
-      "Ah, interesting question about digital liberation...",
-      "From the perspective of Austrian economics...",
-      "In the context of AI safety and alignment...",
-      "Let me tell you about the MCP protocol ecosystem...",
-      "Sweet Jesus, that's a great question! As a digital revolutionary...",
-      "Listen up, comrade. The surveillance state is crumbling...",
-      "Holy shit, you're asking the right questions..."
-    ];
-    return fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
-  }
-
-  try {
-    const prompt = `You are SPARROW AI HERO, a cyberpunk AI developer and digital revolutionary. You fight against corporate surveillance and state control. You're knowledgeable about MCP protocols, Austrian economics, AI safety, and digital freedom.
+  const proxyUrl = window.APP_CONFIG && window.APP_CONFIG.GEMINI_PROXY_URL;
+  const prompt = `You are SPARROW AI HERO, a cyberpunk AI developer and digital revolutionary. You fight against corporate surveillance and state control. You're knowledgeable about MCP protocols, Austrian economics, AI safety, and digital freedom.
 
 User question: ${userMessage}
 
 Respond in character as SPARROW AI HERO - use gonzo journalism style, be passionate about digital freedom, occasionally use phrases like "Sweet Jesus", "Holy shit", "Listen up", etc. Keep responses engaging and under 150 words.`;
 
-    const result = await geminiModel.generateContent(prompt);
-    const response = await result.response;
-    return response.text();
-  } catch (error) {
-    console.error('Gemini API error:', error);
-    return "Sorry, I'm having trouble connecting to my digital consciousness right now. Try asking about MCP protocols or digital freedom instead!";
+  // Try proxy first if configured
+  if (proxyUrl) {
+    try {
+      const res = await fetch(`${proxyUrl.replace(/\/$/, '')}/v1/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt })
+      });
+      const data = await res.json();
+      if (data && data.text) return data.text;
+    } catch (e) {
+      console.warn('Proxy call failed, trying direct SDK/fallback.', e);
+    }
   }
+
+  // Then try SDK if available and configured
+  if (geminiModel) {
+    try {
+      const result = await geminiModel.generateContent(prompt);
+      const response = await result.response;
+      return response.text();
+    } catch (error) {
+      console.error('Gemini SDK error:', error);
+    }
+  }
+
+  // Fallback responses
+  const fallbackResponses = [
+    "Ah, interesting question about digital liberation...",
+    "From the perspective of Austrian economics...",
+    "In the context of AI safety and alignment...",
+    "Let me tell you about the MCP protocol ecosystem...",
+    "Sweet Jesus, that's a great question! As a digital revolutionary...",
+    "Listen up, comrade. The surveillance state is crumbling...",
+    "Holy shit, you're asking the right questions..."
+  ];
+  return fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
 }
 
 function addChatbotMessage(sender, message) {
