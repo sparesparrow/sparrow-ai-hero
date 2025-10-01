@@ -5,13 +5,34 @@
 const GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY';
 let geminiModel = null;
 
+// Utility: dynamically load external scripts if missing
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) {
+      resolve();
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = src;
+    script.async = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error(`Failed to load script: ${src}`));
+    document.head.appendChild(script);
+  });
+}
+
 // Initialize Gemini AI
 function initGeminiAI() {
   if (GEMINI_API_KEY && GEMINI_API_KEY !== 'YOUR_GEMINI_API_KEY') {
     try {
-      const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-      geminiModel = genAI.getGenerativeModel({ model: "gemini-pro" });
-      console.log('Gemini AI initialized successfully');
+      if (typeof GoogleGenerativeAI === 'function') {
+        const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+        geminiModel = genAI.getGenerativeModel({ model: "gemini-pro" });
+        console.log('Gemini AI initialized successfully');
+      } else {
+        console.warn('Gemini SDK not loaded - using fallback responses');
+        geminiModel = null;
+      }
     } catch (error) {
       console.error('Failed to initialize Gemini AI:', error);
       geminiModel = null;
@@ -49,6 +70,13 @@ const translations = {
       tagline: 'AI Developer & MCP Protocol Specialist',
       cta1: 'Explore My Work',
       cta2: 'View Projects'
+    },
+    stats: {
+      title: 'DIGITAL WARRIOR STATS',
+      projects: 'MCP Projects',
+      coverage: 'Test Coverage',
+      response: 'Faster Response',
+      bugs: 'Fewer Bugs'
     },
     expertise: {
       title: 'EXPERTISE AREAS',
@@ -348,6 +376,9 @@ function setTheme(theme) {
 function setLanguage(lang) {
   currentLanguage = lang;
   localStorage.setItem('language', lang);
+  if (document && document.documentElement) {
+    document.documentElement.setAttribute('lang', lang);
+  }
   updateThemeIndicator();
   updateContent();
 }
@@ -358,55 +389,79 @@ function updateThemeIndicator() {
                      currentTheme === 'professional' ? 'PROF' :
                      currentTheme === 'minimal' ? 'MIN' : 'MATRIX';
   const langShort = currentLanguage.toUpperCase();
-  indicator.textContent = `${themeShort}/${langShort}`;
+  if (indicator) {
+    indicator.textContent = `${themeShort}/${langShort}`;
+  }
 }
 
 function updateContent() {
   const t = translations[currentLanguage];
 
-  // Update navigation
-  document.querySelector('a[href="#hero"]').textContent = t.nav.home;
-  document.querySelector('a[href="#stats"]').textContent = t.nav.stats;
-  document.querySelector('a[href="#expertise"]').textContent = t.nav.expertise;
-  document.querySelector('a[href="#weapons"]').textContent = t.nav.weapons;
-  document.querySelector('a[href="#manifestos"]').textContent = t.nav.manifestos;
-  document.querySelector('a[href="#tools"]').textContent = t.nav.tools;
-  document.querySelector('a[href="#contact"]').textContent = t.nav.contact;
+  function setTextIfPresent(selector, text) {
+    const el = document.querySelector(selector);
+    if (el && typeof text === 'string') {
+      el.textContent = text;
+    }
+  }
+
+  // Update navigation (map "weapons" label to the actual #projects link)
+  setTextIfPresent('a[href="#hero"]', t.nav.home);
+  setTextIfPresent('a[href="#stats"]', t.nav.stats);
+  setTextIfPresent('a[href="#expertise"]', t.nav.expertise);
+  setTextIfPresent('a[href="#projects"]', t.nav.weapons);
+  setTextIfPresent('a[href="#manifestos"]', t.nav.manifestos);
+  setTextIfPresent('a[href="#tools"]', t.nav.tools);
+  setTextIfPresent('a[href="#contact"]', t.nav.contact);
 
   // Update hero
-  document.getElementById('hero-title').textContent = t.hero.title;
-  document.getElementById('hero-subtitle').textContent = t.hero.subtitle;
-  document.getElementById('hero-tagline').textContent = t.hero.tagline;
-  document.getElementById('start-journey-btn').textContent = t.hero.cta1;
-  document.getElementById('weapons-btn').textContent = t.hero.cta2;
+  setTextIfPresent('#hero-title', t.hero.title);
+  setTextIfPresent('#hero-subtitle', t.hero.subtitle);
+  setTextIfPresent('#hero-tagline', t.hero.tagline);
+  setTextIfPresent('#start-journey-btn', t.hero.cta1);
+  setTextIfPresent('#weapons-btn', t.hero.cta2);
 
-  // Update sections
-  document.querySelector('#stats .section-title').textContent = t.stats.title;
-  document.querySelector('#expertise .section-title').textContent = t.expertise.title;
-  document.querySelector('#weapons .section-title').textContent = t.weapons.title;
-  document.querySelector('#manifestos .section-title').textContent = t.manifestos.title;
-  document.querySelector('#tools .section-title').textContent = t.tools.title;
-  document.querySelector('#contact .section-title').textContent = t.contact.title;
-  document.querySelector('.contact-content p').textContent = t.contact.desc;
+  // Update section titles (map weapons -> projects)
+  setTextIfPresent('#stats .section-title', (t.stats && t.stats.title) || '');
+  setTextIfPresent('#expertise .section-title', t.expertise.title);
+  setTextIfPresent('#projects .section-title', (t.weapons && t.weapons.title) || 'PROJECTS');
+  setTextIfPresent('#manifestos .section-title', t.manifestos.title);
+  setTextIfPresent('#tools .section-title', t.tools.title);
+  setTextIfPresent('#contact .section-title', t.contact.title);
+  setTextIfPresent('.contact-content p', t.contact.desc);
 
-  // Update expertise cards
-  const expertiseCards = document.querySelectorAll('.expertise-card');
-  expertiseCards.forEach((card, index) => {
-    const exp = Object.values(t.expertise)[index + 1]; // Skip title
-    if (exp) {
-      card.querySelector('h3').textContent = exp.title;
-      card.querySelector('p').textContent = exp.desc;
-      card.querySelector('.expertise-gonzo-name').textContent = exp.gonzoName;
+  // Update stats labels
+  const statLabelKeys = ['projects', 'coverage', 'response', 'bugs'];
+  const statLabels = document.querySelectorAll('#stats .stat-label');
+  statLabels.forEach((labelEl, idx) => {
+    const key = statLabelKeys[idx];
+    if (t.stats && t.stats[key] && labelEl) {
+      labelEl.textContent = t.stats[key];
     }
   });
 
-  // Update tools
+  // Update expertise cards (skip the "title" key)
+  const expertiseCards = document.querySelectorAll('.expertise-card');
+  expertiseCards.forEach((card, index) => {
+    const exp = Object.values(t.expertise)[index + 1];
+    if (exp) {
+      const titleEl = card.querySelector('h3');
+      const descEl = card.querySelector('p');
+      const gonzoEl = card.querySelector('.expertise-gonzo-name');
+      if (titleEl) titleEl.textContent = exp.title;
+      if (descEl) descEl.textContent = exp.desc;
+      if (gonzoEl) gonzoEl.textContent = exp.gonzoName;
+    }
+  });
+
+  // Update tools (skip the "title" key)
   const toolCards = document.querySelectorAll('.tool-card');
   toolCards.forEach((card, index) => {
-    const tool = Object.values(t.tools)[index + 1]; // Skip title
+    const tool = Object.values(t.tools)[index + 1];
     if (tool) {
-      card.querySelector('h3').textContent = tool.title;
-      card.querySelector('p').textContent = tool.desc;
+      const titleEl = card.querySelector('h3');
+      const descEl = card.querySelector('p');
+      if (titleEl) titleEl.textContent = tool.title;
+      if (descEl) descEl.textContent = tool.desc;
     }
   });
 }
@@ -446,7 +501,7 @@ function initMatrixRain() {
   const matrixArray = matrix.split('');
 
   const fontSize = 14;
-  const columns = canvas.width / fontSize;
+  let columns = Math.floor(canvas.width / fontSize);
   const drops = [];
 
   for (let x = 0; x < columns; x++) {
@@ -476,6 +531,11 @@ function initMatrixRain() {
   window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    columns = Math.floor(canvas.width / fontSize);
+    drops.length = 0;
+    for (let x = 0; x < columns; x++) {
+      drops[x] = 1;
+    }
   });
 }
 
@@ -608,17 +668,21 @@ function initThemeLanguageControls() {
   const themeBtn = document.getElementById('theme-toggle');
   const langBtn = document.getElementById('lang-toggle');
 
-  themeBtn.addEventListener('click', () => {
-    const currentIndex = themes.indexOf(currentTheme);
-    const nextIndex = (currentIndex + 1) % themes.length;
-    setTheme(themes[nextIndex]);
-  });
+  if (themeBtn) {
+    themeBtn.addEventListener('click', () => {
+      const currentIndex = themes.indexOf(currentTheme);
+      const nextIndex = (currentIndex + 1) % themes.length;
+      setTheme(themes[nextIndex]);
+    });
+  }
 
-  langBtn.addEventListener('click', () => {
-    const currentIndex = languages.indexOf(currentLanguage);
-    const nextIndex = (currentIndex + 1) % languages.length;
-    setLanguage(languages[nextIndex]);
-  });
+  if (langBtn) {
+    langBtn.addEventListener('click', () => {
+      const currentIndex = languages.indexOf(currentLanguage);
+      const nextIndex = (currentIndex + 1) % languages.length;
+      setLanguage(languages[nextIndex]);
+    });
+  }
 }
 
 // Stats Section
@@ -631,9 +695,9 @@ function initStats() {
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
-        animateCounter(document.getElementById('projects-count'), 15);
-        animateCounter(document.getElementById('coverage-count'), 98);
-        animateCounter(document.getElementById('response-count'), 3);
+        animateCounter(document.getElementById('projects-count'), 15, '+');
+        animateCounter(document.getElementById('coverage-count'), 98, '%');
+        animateCounter(document.getElementById('response-count'), 3, 'x');
         animateCounter(document.getElementById('bugs-count'), 85, '%', 2000, true);
         observer.unobserve(entry.target);
       }
@@ -657,21 +721,28 @@ function initHero() {
   const t = translations[currentLanguage];
 
   // Typewriter effects with current language
-  setTimeout(() => typewriterEffect(subtitle, t.hero.subtitle), 500);
-  setTimeout(() => typewriterEffect(tagline, t.hero.tagline), 2000);
+  if (subtitle) setTimeout(() => typewriterEffect(subtitle, t.hero.subtitle), 500);
+  if (tagline) setTimeout(() => typewriterEffect(tagline, t.hero.tagline), 2000);
 
-  startBtn.addEventListener('click', () => {
-    document.getElementById('projects').scrollIntoView({ behavior: 'smooth' });
-  });
+  if (startBtn) {
+    startBtn.addEventListener('click', () => {
+      const section = document.getElementById('projects');
+      if (section) section.scrollIntoView({ behavior: 'smooth' });
+    });
+  }
 
-  weaponsBtn.addEventListener('click', () => {
-    document.getElementById('projects').scrollIntoView({ behavior: 'smooth' });
-  });
+  if (weaponsBtn) {
+    weaponsBtn.addEventListener('click', () => {
+      const section = document.getElementById('projects');
+      if (section) section.scrollIntoView({ behavior: 'smooth' });
+    });
+  }
 }
 
 // Projects Section - Categorized by Programming Language
 function initProjects() {
   const projectsContent = document.getElementById('projects-content');
+  if (!projectsContent) return;
 
   Object.entries(portfolioData.projects).forEach(([language, projects], categoryIndex) => {
     const categoryDiv = document.createElement('div');
@@ -699,7 +770,7 @@ function initProjects() {
         <div class="project-tags">
           ${project.tags.map(tag => `<span class="project-tag">${tag}</span>`).join('')}
         </div>
-        <a href="${project.url}" target="_blank" class="project-link">View Code →</a>
+        <a href="${project.url}" target="_blank" rel="noopener noreferrer" class="project-link">View Code →</a>
       `;
       projectGrid.appendChild(projectCard);
     });
@@ -767,7 +838,7 @@ function initManifestos() {
       <h3 class="manifesto-title">${manifesto.title}</h3>
       <p class="manifesto-description">${manifesto.description}</p>
       <div class="manifesto-date">${manifesto.date}</div>
-      <a href="${manifesto.url}" target="_blank" class="manifesto-link">Read Manifesto →</a>
+      <a href="${manifesto.url}" target="_blank" rel="noopener noreferrer" class="manifesto-link">Read Manifesto →</a>
     `;
     manifestosContent.appendChild(manifestoCard);
   });
@@ -787,26 +858,36 @@ function initTools() {
   });
 
   // Mermaid Editor
-  document.getElementById('open-mermaid-btn').addEventListener('click', openMermaidEditor);
+  const mermaidBtn = document.getElementById('open-mermaid-btn');
+  if (mermaidBtn) mermaidBtn.addEventListener('click', openMermaidEditor);
 
   // Voice Chat
-  document.getElementById('open-voice-btn').addEventListener('click', openVoiceChat);
+  const voiceBtn = document.getElementById('open-voice-btn');
+  if (voiceBtn) voiceBtn.addEventListener('click', openVoiceChat);
 
   // Chatbot
-  document.getElementById('open-chatbot-btn').addEventListener('click', openChatbot);
+  const chatbotBtn = document.getElementById('open-chatbot-btn');
+  if (chatbotBtn) chatbotBtn.addEventListener('click', openChatbot);
 
   // Infographics
-  document.getElementById('open-infographics-btn').addEventListener('click', openInfographics);
+  const infoBtn = document.getElementById('open-infographics-btn');
+  if (infoBtn) infoBtn.addEventListener('click', openInfographics);
 
   // Modal close
-  document.getElementById('modal-close').addEventListener('click', closeModal);
-  document.getElementById('modal-backdrop').addEventListener('click', closeModal);
+  const closeBtn = document.getElementById('modal-close');
+  const backdrop = document.getElementById('modal-backdrop');
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (backdrop) backdrop.addEventListener('click', closeModal);
 }
 
 // Modal functions
 function openModal(content) {
   const modalContainer = document.getElementById('modal-container');
   const modalBody = document.getElementById('modal-body');
+  if (!modalContainer || !modalBody) {
+    console.warn('Modal container not found.');
+    return;
+  }
   modalBody.innerHTML = content;
   modalContainer.style.display = 'flex';
 }
@@ -834,18 +915,34 @@ function openMermaidEditor() {
 
   openModal(content);
 
-  // Initialize Mermaid
-  mermaid.initialize({
-    startOnLoad: false,
-    theme: 'dark',
-    themeVariables: {
-      primaryColor: '#ff6b35',
-      primaryTextColor: '#fff',
-      primaryBorderColor: '#004d40',
-      lineColor: '#ffc107',
-      background: '#0f0f0f'
+  // Initialize Mermaid (load dynamically if missing)
+  const ensureMermaid = async () => {
+    try {
+      if (typeof mermaid === 'undefined') {
+        await loadScript('https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js');
+      }
+      if (typeof mermaid === 'undefined') {
+        throw new Error('Mermaid not available');
+      }
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: 'dark',
+        themeVariables: {
+          primaryColor: '#ff6b35',
+          primaryTextColor: '#fff',
+          primaryBorderColor: '#004d40',
+          lineColor: '#ffc107',
+          background: '#0f0f0f'
+        }
+      });
+    } catch (e) {
+      const out = document.getElementById('mermaid-output');
+      if (out) {
+        out.innerHTML = '<div style="color: var(--text-secondary);">Mermaid failed to load. Please check your network and try again.</div>';
+      }
     }
-  });
+  };
+  ensureMermaid();
 
   // Event listeners
   document.getElementById('diagram-examples').addEventListener('change', (e) => {
@@ -873,12 +970,18 @@ function openMermaidEditor() {
     document.getElementById('mermaid-code').value = examples[e.target.value] || '';
   });
 
-  document.getElementById('render-diagram').addEventListener('click', () => {
-    const code = document.getElementById('mermaid-code').value;
-    const output = document.getElementById('mermaid-output');
-    output.innerHTML = `<div class="mermaid">${code}</div>`;
-    mermaid.init(undefined, output.querySelector('.mermaid'));
-  });
+  const renderBtn = document.getElementById('render-diagram');
+  if (renderBtn) {
+    renderBtn.addEventListener('click', () => {
+      const code = document.getElementById('mermaid-code').value;
+      const output = document.getElementById('mermaid-output');
+      if (!output) return;
+      output.innerHTML = `<div class="mermaid">${code}</div>`;
+      if (typeof mermaid !== 'undefined') {
+        mermaid.init(undefined, output.querySelector('.mermaid'));
+      }
+    });
+  }
 }
 
 function openVoiceChat() {
@@ -895,9 +998,10 @@ function openVoiceChat() {
 
   openModal(content);
 
-  // Browser Speech API
-  if ('webkitSpeechRecognition' in window) {
-    const recognition = new webkitSpeechRecognition();
+  // Browser Speech API (standard or webkit)
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (SpeechRecognition) {
+    const recognition = new SpeechRecognition();
     recognition.lang = 'cs-CZ';
     recognition.continuous = false;
     recognition.interimResults = false;
@@ -928,7 +1032,8 @@ function openVoiceChat() {
       startBtn.disabled = false;
     };
   } else {
-    document.getElementById('voice-status').textContent = 'Voice recognition not supported in this browser';
+    const statusEl = document.getElementById('voice-status');
+    if (statusEl) statusEl.textContent = 'Voice recognition not supported in this browser';
   }
 }
 
@@ -1006,34 +1111,50 @@ function openChatbot() {
 
 // Gemini AI Response Function
 async function generateGeminiResponse(userMessage) {
-  if (!geminiModel) {
-    // Fallback responses when Gemini is not configured
-    const fallbackResponses = [
-      "Ah, interesting question about digital liberation...",
-      "From the perspective of Austrian economics...",
-      "In the context of AI safety and alignment...",
-      "Let me tell you about the MCP protocol ecosystem...",
-      "Sweet Jesus, that's a great question! As a digital revolutionary...",
-      "Listen up, comrade. The surveillance state is crumbling...",
-      "Holy shit, you're asking the right questions..."
-    ];
-    return fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
-  }
-
-  try {
-    const prompt = `You are SPARROW AI HERO, a cyberpunk AI developer and digital revolutionary. You fight against corporate surveillance and state control. You're knowledgeable about MCP protocols, Austrian economics, AI safety, and digital freedom.
+  const proxyUrl = window.APP_CONFIG && window.APP_CONFIG.GEMINI_PROXY_URL;
+  const prompt = `You are SPARROW AI HERO, a cyberpunk AI developer and digital revolutionary. You fight against corporate surveillance and state control. You're knowledgeable about MCP protocols, Austrian economics, AI safety, and digital freedom.
 
 User question: ${userMessage}
 
 Respond in character as SPARROW AI HERO - use gonzo journalism style, be passionate about digital freedom, occasionally use phrases like "Sweet Jesus", "Holy shit", "Listen up", etc. Keep responses engaging and under 150 words.`;
 
-    const result = await geminiModel.generateContent(prompt);
-    const response = await result.response;
-    return response.text();
-  } catch (error) {
-    console.error('Gemini API error:', error);
-    return "Sorry, I'm having trouble connecting to my digital consciousness right now. Try asking about MCP protocols or digital freedom instead!";
+  // Try proxy first if configured
+  if (proxyUrl) {
+    try {
+      const res = await fetch(`${proxyUrl.replace(/\/$/, '')}/v1/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt })
+      });
+      const data = await res.json();
+      if (data && data.text) return data.text;
+    } catch (e) {
+      console.warn('Proxy call failed, trying direct SDK/fallback.', e);
+    }
   }
+
+  // Then try SDK if available and configured
+  if (geminiModel) {
+    try {
+      const result = await geminiModel.generateContent(prompt);
+      const response = await result.response;
+      return response.text();
+    } catch (error) {
+      console.error('Gemini SDK error:', error);
+    }
+  }
+
+  // Fallback responses
+  const fallbackResponses = [
+    "Ah, interesting question about digital liberation...",
+    "From the perspective of Austrian economics...",
+    "In the context of AI safety and alignment...",
+    "Let me tell you about the MCP protocol ecosystem...",
+    "Sweet Jesus, that's a great question! As a digital revolutionary...",
+    "Listen up, comrade. The surveillance state is crumbling...",
+    "Holy shit, you're asking the right questions..."
+  ];
+  return fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
 }
 
 function addChatbotMessage(sender, message) {
@@ -1064,8 +1185,18 @@ function openInfographics() {
 
   openModal(content);
 
-  // Create charts using Chart.js
-  const ctx1 = document.getElementById('mcp-chart').getContext('2d');
+  // Create charts using Chart.js (guard if missing)
+  const canvas1 = document.getElementById('mcp-chart');
+  const canvas2 = document.getElementById('projects-chart');
+  if (typeof Chart === 'undefined') {
+    const container = document.querySelector('.infographics-container');
+    if (container) {
+      container.innerHTML = '<div style="color: var(--text-secondary); text-align:center;">Charts unavailable (Chart.js failed to load).</div>';
+    }
+    return;
+  }
+
+  const ctx1 = canvas1.getContext('2d');
   new Chart(ctx1, {
     type: 'doughnut',
     data: {
@@ -1087,7 +1218,7 @@ function openInfographics() {
     }
   });
 
-  const ctx2 = document.getElementById('projects-chart').getContext('2d');
+  const ctx2 = canvas2.getContext('2d');
   new Chart(ctx2, {
     type: 'bar',
     data: {
@@ -1128,9 +1259,11 @@ function initNavigation() {
   const navToggle = document.querySelector('.nav-toggle');
   const navLinks = document.querySelector('.nav-links');
 
-  navToggle.addEventListener('click', () => {
-    navLinks.classList.toggle('active');
-  });
+  if (navToggle && navLinks) {
+    navToggle.addEventListener('click', () => {
+      navLinks.classList.toggle('active');
+    });
+  }
 
   // Smooth scrolling for nav links
   document.querySelectorAll('.nav-links a').forEach(link => {

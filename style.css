@@ -921,6 +921,11 @@ nav {
   padding: 3rem 2rem 2rem;
 }
 
+/* Alias: apply same padding when using id from HTML */
+#modal-body {
+  padding: 3rem 2rem 2rem;
+}
+
 /* Tool-specific styles */
 .mermaid-editor h2,
 .voice-chat h2,
@@ -1006,6 +1011,12 @@ nav {
   margin-right: 2rem;
 }
 
+/* Alias corrected class name used by JS */
+.chat-message.sparebot {
+  background: var(--sparrow-orange);
+  margin-right: 2rem;
+}
+
 .chatbot-message.user {
   background: var(--underground-teal);
   text-align: right;
@@ -1017,6 +1028,13 @@ nav {
 }
 
 .voice-status {
+  margin-top: 1rem;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* Alias id used in HTML */
+#voice-status {
   margin-top: 1rem;
   color: var(--text-secondary);
   font-style: italic;
