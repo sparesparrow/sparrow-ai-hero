@@ -229,6 +229,30 @@ nav {
   transform: scale(1.1);
 }
 
+/* Audio Control Specific Styles */
+#audio-toggle {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+#audio-toggle.playing {
+  animation: audioPulse 2s infinite;
+}
+
+@keyframes audioPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 107, 53, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(255, 107, 53, 0);
+  }
+}
+
+/* Audio element styling */
+#background-music {
+  display: none; /* Hidden audio element */
+}
+
 .theme-lang-indicator {
   font-size: 0.8rem;
   color: var(--anarchy-yellow);

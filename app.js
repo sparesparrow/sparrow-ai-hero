@@ -27,6 +27,10 @@ const languages = ['en', 'cs'];
 let currentTheme = localStorage.getItem('theme') || 'cyberpunk';
 let currentLanguage = localStorage.getItem('language') || 'en';
 
+// Audio Management
+let backgroundMusic = null;
+let isMusicPlaying = false;
+
 // Language data
 const translations = {
   en: {
@@ -501,6 +505,76 @@ function initGlitchEffect() {
   title.setAttribute('data-text', 'SPARROW AI HERO');
 }
 
+// Audio Functions
+function initAudio() {
+  backgroundMusic = document.getElementById('background-music');
+  
+  // Set volume to a reasonable level (30%)
+  backgroundMusic.volume = 0.3;
+  
+  // Try to autoplay when user first interacts with the page
+  document.addEventListener('click', () => {
+    if (!isMusicPlaying && backgroundMusic.paused) {
+      playBackgroundMusic();
+    }
+  }, { once: true });
+  
+  // Handle audio toggle button
+  const audioToggle = document.getElementById('audio-toggle');
+  audioToggle.addEventListener('click', toggleBackgroundMusic);
+  
+  // Update button state based on audio state
+  updateAudioButtonState();
+}
+
+function playBackgroundMusic() {
+  if (backgroundMusic && backgroundMusic.paused) {
+    backgroundMusic.play().then(() => {
+      isMusicPlaying = true;
+      updateAudioButtonState();
+      console.log('Background music started');
+    }).catch(error => {
+      console.log('Autoplay prevented by browser:', error);
+      // Show a subtle indicator that music is available
+      const audioToggle = document.getElementById('audio-toggle');
+      audioToggle.style.opacity = '0.7';
+      audioToggle.title = 'Click to start background music';
+    });
+  }
+}
+
+function pauseBackgroundMusic() {
+  if (backgroundMusic && !backgroundMusic.paused) {
+    backgroundMusic.pause();
+    isMusicPlaying = false;
+    updateAudioButtonState();
+    console.log('Background music paused');
+  }
+}
+
+function toggleBackgroundMusic() {
+  if (isMusicPlaying) {
+    pauseBackgroundMusic();
+  } else {
+    playBackgroundMusic();
+  }
+}
+
+function updateAudioButtonState() {
+  const audioToggle = document.getElementById('audio-toggle');
+  if (isMusicPlaying) {
+    audioToggle.textContent = '🔊';
+    audioToggle.title = 'Pause background music';
+    audioToggle.style.opacity = '1';
+    audioToggle.classList.add('playing');
+  } else {
+    audioToggle.textContent = '🎵';
+    audioToggle.title = 'Play background music';
+    audioToggle.style.opacity = '0.7';
+    audioToggle.classList.remove('playing');
+  }
+}
+
 // Initialize the portfolio
 function initPortfolio() {
   // Initialize AI first
@@ -510,6 +584,7 @@ function initPortfolio() {
   setTheme(currentTheme);
   setLanguage(currentLanguage);
 
+  initAudio();
   initHero();
   initStats();
   initProjects();

@@ -11,6 +11,12 @@
     <script src="https://cdn.jsdelivr.net/npm/@google/generative-ai/dist/index.min.js"></script>
 </head>
 <body>
+    <!-- Background Music -->
+    <audio id="background-music" loop preload="auto">
+        <source src="background-music.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
     <!-- Navigation -->
     <nav id="main-nav">
         <div class="nav-container">
@@ -28,6 +34,9 @@
                 <li><a href="#contact">Contact</a></li>
             </ul>
             <div class="nav-controls">
+                <button id="audio-toggle" class="nav-control-btn" aria-label="Toggle background music">
+                    🎵
+                </button>
                 <button id="theme-toggle" class="nav-control-btn" aria-label="Switch theme">
                     🎨
                 </button>
